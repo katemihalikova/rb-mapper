@@ -1,0 +1,22 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    mini_portile2 (2.4.0)
+    nokogiri (1.10.10-x64-mingw32)
+      mini_portile2 (~> 2.4.0)
+    rexml (3.2.4)
+    ruby-graphviz (1.2.5)
+      rexml
+
+PLATFORMS
+  x64-mingw32
+
+DEPENDENCIES
+  nokogiri (~> 1.10)
+  ruby-graphviz (~> 1.2)
+
+RUBY VERSION
+   ruby 2.7.2p137
+
+BUNDLED WITH
+   2.1.4
