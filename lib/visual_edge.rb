@@ -21,7 +21,7 @@ class VisualEdge
 
   # create instance of +self+ by simple storing of all parameters
   def initialize(edge, v1, v2, directed = false)
-  	@edge = edge
+    @edge = edge
     @v1 = v1
     @v2 = v2
     @directed = directed

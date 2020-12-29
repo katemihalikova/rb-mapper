@@ -19,7 +19,7 @@ class VisualGraph
 
   # Create instance of +self+ by simple storing of all given parameters.
   def initialize(graph, visual_vertices, visual_edges, bounds)
-  	@graph = graph
+    @graph = graph
     @visual_vertices = visual_vertices
     @visual_edges = visual_edges
     @bounds = bounds
@@ -30,13 +30,13 @@ class VisualGraph
   def export_graphviz(export_filename)
     # create GraphViz object from ruby-graphviz package
     graph_viz_output = GraphViz.new( :G,
-    								                  use: :neato,
-		                                  truecolor: true,
-                              		    inputscale: @scale,
-                              		    margin: 0,
-                              		    bb: "#{@bounds[:minlon]},#{@bounds[:minlat]},
-                                  		    #{@bounds[:maxlon]},#{@bounds[:maxlat]}",
-                              		    outputorder: :nodesfirst)
+                                      use: :neato,
+                                      truecolor: true,
+                                      inputscale: @scale,
+                                      margin: 0,
+                                      bb: "#{@bounds[:minlon]},#{@bounds[:minlat]},
+                                          #{@bounds[:maxlon]},#{@bounds[:maxlat]}",
+                                      outputorder: :nodesfirst)
 
     # append all vertices
     @visual_vertices.each { |k,v|
@@ -47,15 +47,15 @@ class VisualGraph
         width: v.start || v.end ? 0.25 : 0.05,
         color: v.start ? 'darkgreen' : v.end ? 'blue' : v.part_of_path ? 'red' : 'black',
       )
-	  }
+    }
 
     # append all edges
-	  @visual_edges.each { |edge|
+    @visual_edges.each { |edge|
       graph_viz_output.add_edges( edge.v1.id, edge.v2.id,
         dir: edge.directed ? 'forward' : 'none',
         color: edge.part_of_path ? 'red' : edge.emphesized ? 'orange' : 'black',
       )
-	  }
+    }
 
     # export to a given format
     format_sym = export_filename.slice(export_filename.rindex('.')+1,export_filename.size).to_sym
