@@ -1,6 +1,7 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    haversine (0.3.2)
     mini_portile2 (2.4.0)
     nokogiri (1.10.10-x64-mingw32)
       mini_portile2 (~> 2.4.0)
@@ -12,6 +13,7 @@ PLATFORMS
   x64-mingw32
 
 DEPENDENCIES
+  haversine (~> 0.3)
   nokogiri (~> 1.10)
   ruby-graphviz (~> 1.2)
 
