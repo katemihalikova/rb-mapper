@@ -8,9 +8,10 @@ class GraphLoader
 	attr_reader :highway_attributes
 
 	# Create an instance, save +filename+ and preset highway attributes
-	def initialize(filename, highway_attributes)
+	def initialize(filename, highway_attributes, dir)
 		@filename = filename
 		@highway_attributes = highway_attributes 
+		@dir = dir
 	end
 
 	# Load graph from Graphviz file which was previously constructed from this application, i.e. contains necessary data.
@@ -54,12 +55,12 @@ class GraphLoader
 			speed = 50
 			one_way = false
 			link.each_attribute { |k,v|
-				speed = v if k == "speed"
-				one_way = true if k == "oneway"
+				speed = v.to_i if k == "speed"
+				one_way = true if k == "oneway" && @dir
 			}
 			e = Edge.new(vid_from, vid_to, speed, one_way)
 			list_of_edges << e
-			list_of_visual_edges << VisualEdge.new(e, hash_of_visual_vertices[vid_from], hash_of_visual_vertices[vid_to])
+			list_of_visual_edges << VisualEdge.new(e, hash_of_visual_vertices[vid_from], hash_of_visual_vertices[vid_to], one_way)
 		}
 
 		# Create Graph instance
@@ -76,7 +77,55 @@ class GraphLoader
 	# Method to load graph from OSM file and create +Graph+ and +VisualGraph+ instances from +self.filename+
 	#
 	# @return [+Graph+, +VisualGraph+]
+	# UC1, UC2
 	def load_graph()
-		# TODO
+		ProcessLogger.log("Loading graph from OSM file #{@filename}.")
+
+		xml = File.open(@filename) { |f| Nokogiri::XML(f) }
+
+		# aux data structures
+		hash_of_vertices = {}
+		list_of_edges = []
+		hash_of_visual_vertices = {}
+		list_of_visual_edges = []
+
+		xml.xpath("/osm/way[tag[@k='highway'][#{@highway_attributes.map{|v| "@v='#{v}'"}.join(' or ')}]]").each{|way|
+
+			vertices = way.css("nd").map{|nd|
+				vid = nd["ref"]
+				if !hash_of_visual_vertices.has_key?(vid)
+					node = xml.at_xpath("/osm/node[@id='#{vid}']")
+					v = Vertex.new(vid)
+					hash_of_vertices[vid] = v
+					hash_of_visual_vertices[vid] = VisualVertex.new(vid, v, node["lat"], node["lon"], node["lat"].to_f, node["lon"].to_f)
+				end
+				hash_of_visual_vertices[vid]
+			}
+			edges = vertices.drop(1).each_with_index.map{|vertex, i| [vertices[i], vertex]}.map{|(visual_vertex_one, visual_vertex_two)|
+				speed_element = way.at_xpath("tag[@k='maxspeed']")
+				one_way_element = way.at_xpath("tag[@k='oneway']")
+				speed = speed_element ? speed_element["v"].to_i : 50
+				one_way = @dir && one_way_element ? one_way_element["v"] == "yes" : false
+				e = Edge.new(visual_vertex_one.id, visual_vertex_two.id, speed, one_way)
+				list_of_edges << e
+				list_of_visual_edges << VisualEdge.new(e, visual_vertex_one, visual_vertex_two, one_way)
+			}
+
+		}
+
+		# Create Graph instance
+		g = Graph.new(hash_of_vertices, list_of_edges)
+
+		# Create VisualGraph instance
+		bounds_element = xml.at_css("bounds")
+		bounds = {
+			:minlat => bounds_element["minlat"],
+			:minlon => bounds_element["minlon"],
+			:maxlat => bounds_element["maxlat"],
+			:maxlon => bounds_element["maxlon"],
+		}
+		vg = VisualGraph.new(g, hash_of_visual_vertices, list_of_visual_edges, bounds)
+
+		return g, vg
 	end
 end
