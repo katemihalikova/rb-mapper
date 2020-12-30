@@ -1,5 +1,13 @@
 # rb-mapper
 
+## Install
+
+Get the right ruby version specified in [.ruby-version](./.ruby-version) and install dependencies using Bundler:
+
+```sh
+bundle install
+```
+
 ## Usage
 
 ```sh
